@@ -28,7 +28,7 @@ import org.cloudfoundry.multiapps.controller.persistence.util.SqlQueryExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 
 public class FileService {
 

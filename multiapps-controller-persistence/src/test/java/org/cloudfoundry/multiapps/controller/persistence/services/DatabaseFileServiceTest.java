@@ -20,7 +20,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 
 import org.cloudfoundry.multiapps.common.util.DigestHelper;
 import org.cloudfoundry.multiapps.controller.persistence.DataSourceWithDialect;

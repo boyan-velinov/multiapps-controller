@@ -27,7 +27,7 @@ import org.cloudfoundry.multiapps.controller.persistence.services.FileContentPro
 import org.cloudfoundry.multiapps.controller.persistence.util.JdbcUtil;
 import org.slf4j.Logger;
 
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 
 public abstract class SqlFileQueryProvider {
 
