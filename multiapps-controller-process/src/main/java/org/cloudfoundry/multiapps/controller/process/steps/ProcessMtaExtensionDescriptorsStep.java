@@ -44,7 +44,8 @@ public class ProcessMtaExtensionDescriptorsStep extends SyncFlowableStep {
         List<ExtensionDescriptor> extensionDescriptorChain = extensionDescriptorChainBuilder.build(deploymentDescriptor,
                                                                                                    extensionDescriptors);
 
-        logUsedExtensionDescriptors(extensionDescriptorChain);
+        logUsageOfExtensionDescriptors(extensionDescriptors, extensionDescriptorChain);
+
         context.setVariable(Variables.MTA_EXTENSION_DESCRIPTOR_CHAIN, extensionDescriptorChain);
         getStepLogger().debug(Messages.MTA_EXTENSION_DESCRIPTORS_PROCESSED);
         return StepPhase.DONE;
@@ -75,7 +76,7 @@ public class ProcessMtaExtensionDescriptorsStep extends SyncFlowableStep {
             for (String extensionDescriptorFileId : fileIds) {
                 fileService.consumeFileContent(spaceId, extensionDescriptorFileId, extensionDescriptorConsumer);
             }
-            getStepLogger().debug(Messages.EXTENSION_DESCRIPTORS, SecureSerialization.toJson(extensionDescriptors));
+            getStepLogger().debug(Messages.PROVIDED_EXTENSION_DESCRIPTORS, SecureSerialization.toJson(extensionDescriptors));
             return extensionDescriptors;
         } catch (FileStorageException e) {
             throw new SLException(e, e.getMessage());
@@ -83,18 +84,28 @@ public class ProcessMtaExtensionDescriptorsStep extends SyncFlowableStep {
 
     }
 
-    private void logUsedExtensionDescriptors(List<ExtensionDescriptor> extensionDescriptorChain) {
-        if (!extensionDescriptorChain.isEmpty()) {
-            getStepLogger().debug(createExtensionDescriptorsIdsMessage(extensionDescriptorChain));
-        } else {
-            getStepLogger().debug(Messages.NO_EXTENSION_DESCRIPTORS_PROVIDED);
+    private void logUsageOfExtensionDescriptors(List<ExtensionDescriptor> providedExtensionDescriptors,
+                                                List<ExtensionDescriptor> extensionDescriptorChain) {
+        if (extensionDescriptorChain.isEmpty()) {
+            getStepLogger().debug(Messages.NO_EXTENSION_DESCRIPTORS_IN_USE);
+            return;
         }
-    }
 
-    private String createExtensionDescriptorsIdsMessage(List<ExtensionDescriptor> extensionDescriptorChain) {
-        return format(Messages.USED_EXTENSION_DESCRIPTORS_IDS, extensionDescriptorChain.stream()
-                                                                                       .map(ExtensionDescriptor::getId)
-                                                                                       .collect(Collectors.joining(", ")));
+        List<String> usedExtensionDescriptorIds = extensionDescriptorChain.stream()
+                                                                          .map(ExtensionDescriptor::getId)
+                                                                          .collect(Collectors.toList());
+
+        getStepLogger().info(format(Messages.EXTENSION_DESCRIPTORS_IN_USE,
+                                    String.join(", ", usedExtensionDescriptorIds)));
+        
+        List<String> unusedExtensionDescriptors = providedExtensionDescriptors.stream()
+                                                                              .map(ExtensionDescriptor::getId)
+                                                                              .filter(id -> !usedExtensionDescriptorIds.contains(id))
+                                                                              .collect(Collectors.toList());
+        
+        if (!unusedExtensionDescriptors.isEmpty()) {
+            getStepLogger().debug(Messages.NO_EXTENSION_DESCRIPTORS_IN_USE);
+        }
     }
 
 }
